@@ -47,16 +47,29 @@ function processCommand(command) {
     }
 }
 
-function typeText(text, targetElement) {
+function typeContent(content, targetElement, callback) {
     let index = 0;
     const typeInterval = setInterval(function () {
-        if (index < text.length) {
-            targetElement.textContent += text[index];
-            index++;
+        if (index < content.length) {
+            const currentChar = content[index];
+            if (currentChar === '<') {
+                let endIndex = content.indexOf('>', index);
+                if (endIndex !== -1) {
+                    const tag = content.substring(index, endIndex + 1);
+                    targetElement.insertAdjacentHTML('beforeend', tag);
+                    index = endIndex + 1;
+                }
+            } else {
+                targetElement.textContent += currentChar;
+                index++;
+            }
         } else {
             clearInterval(typeInterval);
             outputElement.appendChild(document.createElement("br"));
             inputElement.focus();
+            if (callback) {
+                callback();
+            }
         }
     }, 15);
 }
@@ -64,22 +77,37 @@ function typeText(text, targetElement) {
 function showHelp(command) {
     if (!isLoggedIn)
     {
-        const helpText =
+        const Text =
             "\nSi se trata de una solicitud real de ayuda en respuesta a un derrame de material peligroso, una explosión, un incendio en su persona, envenenamiento por radiación, un gas asfixiante de origen desconocido, trauma ocular resultante del uso de una estación de lavado de ojos de emergencia en los pisos tres, cuatro u once, un mal funcionamiento de un animal o cualquier otro fallo de equipo experimental lesivo, permanezca en su lugar de trabajo. Un Equipo de Respuesta a Crisis ya ha sido movilizado para deliberar sobre una respuesta a su crisis.\n\nSi necesita ayuda para acceder al sistema, consulte su Manual del Usuario.";
-        typeText(helpText, outputElement);
+        typeContent(Text, outputElement);
     } else {
-        const helpText =
+        const Text =
             "LIB\n     APPEND\n     ATTRIB\n     COPY\n     DIR\n     ERASE\n     FORMAT\n     INTERROGATE\n     LIB\n     PLAY\n     RENAME\n     TAPEDISK\n";
-        typeText(helpText, outputElement);
+        typeContent(Text, outputElement);
     }
 }
 
 function theCake(command) {
     if (!isLoggedIn) return;
-    const helpText =
-    "¿Cuándo fue la última vez que saliste del edificio?\n\n¿Alguien ha salido del edificio recientemente?\nNo sé por qué estamos en confinamiento. No sé quién está a cargo.\nDescubrí algunas cosas, como que estas terminales no tienen que escribir caracteres uno por uno. Y mientras todos trabajamos con equipos de veinte años de antigüedad, de alguna manera pueden permitirse construir un 'Centro de Enriquecimiento'. Echa un vistazo a esta transmisión de seguridad. Sea lo que sea un 'recinto de relajación', no tiene puertas.\n\nNo creo que ir a casa sea parte de nuestra descripción de trabajo anymore.\nSi pasa un supervisor, ¡Presiona Enter!";
-    typeText(helpText, outputElement);
+    const Text =
+        "¿Cuándo fue la última vez que saliste del edificio?\n\n¿Alguien ha salido del edificio recientemente?\nNo sé por qué estamos en confinamiento. No sé quién está a cargo.\nDescubrí algunas cosas, como que estas terminales no tienen que escribir caracteres uno por uno. Y mientras todos trabajamos con equipos de veinte años de antigüedad, de alguna manera pueden permitirse construir un 'Centro de Enriquecimiento'. Echa un vistazo a esta transmisión de seguridad.";
+
+    typeContent(Text, outputElement, function() {
+        const videoElement = document.createElement("video");
+        videoElement.setAttribute("src", "Media/security02.mp4");
+        videoElement.setAttribute("autoplay", true);
+        videoElement.setAttribute("loop", true);
+        videoElement.style.width = "50%";
+        videoElement.style.marginTop = "20px";
+        outputElement.appendChild(videoElement);
+
+        const postVideoText = "Sea lo que sea un 'recinto de relajación', no tiene puertas.\n\nYa no creo que ir a casa sea parte de nuestra descripción de trabajo.\nSi pasa un supervisor, ¡Presiona Enter!";
+        const postVideoDiv = document.createElement("div");
+        outputElement.appendChild(postVideoDiv);
+        typeContent(postVideoText, postVideoDiv);
+    });
 }
+
 
 function startLogin(command) {
     if (!isLoginInProgress) {
@@ -109,7 +137,7 @@ function login(command) {
             isLoginInProgress = false;
             const loginSuccessfulResponse = document.createElement("div");
             loginSuccessfulResponse.className = "output-text";
-            loginSuccessfulResponse.textContent = "GLaDOS v1.07 (c) 1982 Aperture Science, Inc.";
+            loginSuccessfulResponse.textContent = "GLaDOS v1.07 (c) 1982 Aperture Science, Inc.\n\n";
             outputElement.appendChild(loginSuccessfulResponse);
 
             const line1 = document.createElement("div");
